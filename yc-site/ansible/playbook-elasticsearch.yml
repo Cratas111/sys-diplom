@@ -1,0 +1,79 @@
+---
+- name: Install Elasticsearch
+  hosts: elasticsearch
+  become: yes
+  tasks:
+    - name: Install required packages
+      apt:
+        name: ['apt-transport-https', 'openjdk-17-jre-headless', 'wget']
+        state: present
+        update_cache: yes
+
+    - name: Copy Elasticsearch deb package
+      copy:
+        src: files/elasticsearch-8.10.2-amd64.deb
+        dest: /tmp/elasticsearch.deb
+        mode: '0644'
+
+    - name: Install Elasticsearch
+      apt:
+        deb: /tmp/elasticsearch.deb
+        state: present
+
+    - name: Enable and start Elasticsearch service
+      systemd:
+        name: elasticsearch
+        state: started
+        enabled: yes
+
+    - name: Ensure Elasticsearch is listening on 9200
+      wait_for:
+        host: 127.0.0.1
+        port: 9200
+        timeout: 60
+
+- name: Install Kibana
+  hosts: kibana
+  become: yes
+  tasks:
+    - name: Install required packages
+      apt:
+        name: ['apt-transport-https', 'openjdk-17-jre-headless', 'wget']
+        state: present
+        update_cache: yes
+
+    - name: Copy Kibana deb package
+      copy:
+        src: files/kibana-8.10.2-amd64.deb
+        dest: /tmp/kibana.deb
+        mode: '0644'
+
+    - name: Install Kibana
+      apt:
+        deb: /tmp/kibana.deb
+        state: present
+
+    - name: Configure Kibana to connect to Elasticsearch
+      lineinfile:
+        path: /etc/kibana/kibana.yml
+        regexp: '^#?server.host:'
+        line: 'server.host: "0.0.0.0"'
+
+    - name: Set Elasticsearch host in Kibana
+      lineinfile:
+        path: /etc/kibana/kibana.yml
+        regexp: '^#?elasticsearch.hosts:'
+        line: 'elasticsearch.hosts: ["http://elasticsearch.ru-central1.internal:9200"]'
+
+    - name: Enable and start Kibana service
+      systemd:
+        name: kibana
+        state: started
+        enabled: yes
+
+    - name: Ensure Kibana is listening on 5601
+      wait_for:
+        host: 0.0.0.0
+        port: 5601
+        timeout: 60
+

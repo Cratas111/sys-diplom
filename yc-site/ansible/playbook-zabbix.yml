@@ -1,0 +1,74 @@
+---
+- name: Install and configure Zabbix Server
+  hosts: zabbix
+  become: yes
+  tasks:
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name:
+          - nginx
+          - php8.1-fpm
+          - mysql-server
+          - zabbix-server-mysql
+          - zabbix-frontend-php
+          - zabbix-agent
+        state: present
+
+    - name: Ensure MySQL service is running
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+
+    - name: Create Zabbix database
+      community.mysql.mysql_db:
+        name: zabbix
+        encoding: utf8mb4
+        collation: utf8mb4_bin
+        state: present
+      become: yes
+      become_user: mysql
+
+    - name: Create Zabbix database user
+      community.mysql.mysql_user:
+        name: zabbix
+        password: zabbix
+        priv: 'zabbix.*:ALL'
+        host: localhost
+        state: present
+      become: yes
+      become_user: mysql
+
+    - name: Import Zabbix schema
+      command: >
+        zcat /usr/share/doc/zabbix-sql-scripts/mysql/server.sql.gz | mysql -uzabbix -pzabbix zabbix
+      args:
+        warn: false
+      become: yes
+
+    - name: Configure Zabbix server DB connection
+      lineinfile:
+        path: /etc/zabbix/zabbix_server.conf
+        regexp: '^DBPassword='
+        line: 'DBPassword=zabbix'
+
+    - name: Restart Zabbix server
+      service:
+        name: zabbix-server
+        state: restarted
+        enabled: yes
+
+    - name: Ensure nginx and php-fpm are running
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - nginx
+        - php8.1-fpm
+

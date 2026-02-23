@@ -1,0 +1,89 @@
+- name: Create USE template and apply to hosts
+  hosts: localhost
+  gather_facts: no
+  collections:
+    - community.zabbix
+
+  tasks:
+
+  - name: Create USE template
+    community.zabbix.zabbix_template:
+      zabbix_url: "{{ zabbix_api_url }}"
+      login_user: "{{ zabbix_api_user }}"
+      login_password: "{{ zabbix_api_pass }}"
+      template_name: "{{ zabbix_template_use }}"
+      template_groups:
+        - Templates/Operating systems
+      state: present
+
+  # ================= CPU =================
+
+  - name: CPU Utilization
+    community.zabbix.zabbix_item:
+      zabbix_url: "{{ zabbix_api_url }}"
+      login_user: "{{ zabbix_api_user }}"
+      login_password: "{{ zabbix_api_pass }}"
+      name: "CPU user time"
+      key: "system.cpu.util[,user]"
+      type: zabbix_agent
+      value_type: float
+      units: "%"
+      delay: 60
+      host_name: "{{ zabbix_template_use }}"
+
+  - name: CPU Load Trigger
+    community.zabbix.zabbix_trigger:
+      zabbix_url: "{{ zabbix_api_url }}"
+      login_user: "{{ zabbix_api_user }}"
+      login_password: "{{ zabbix_api_pass }}"
+      name: "High CPU load"
+      expression: "avg(/{{ zabbix_template_use }}/system.cpu.load[percpu,avg1],5m)>2"
+      priority: high
+
+  # ================= RAM =================
+
+  - name: Available memory
+    community.zabbix.zabbix_item:
+      zabbix_url: "{{ zabbix_api_url }}"
+      login_user: "{{ zabbix_api_user }}"
+      login_password: "{{ zabbix_api_pass }}"
+      name: "Available memory"
+      key: "vm.memory.size[available]"
+      type: zabbix_agent
+      value_type: unsigned
+      units: B
+      delay: 60
+      host_name: "{{ zabbix_template_use }}"
+
+  - name: Low memory trigger
+    community.zabbix.zabbix_trigger:
+      zabbix_url: "{{ zabbix_api_url }}"
+      login_user: "{{ zabbix_api_user }}"
+      login_password: "{{ zabbix_api_pass }}"
+      name: "Low available memory"
+      expression: "last(/{{ zabbix_template_use }}/vm.memory.size[available])<20G"
+      priority: high
+
+  # ================= DISK =================
+
+  - name: Disk usage
+    community.zabbix.zabbix_item:
+      zabbix_url: "{{ zabbix_api_url }}"
+      login_user: "{{ zabbix_api_user }}"
+      login_password: "{{ zabbix_api_pass }}"
+      name: "Disk usage /"
+      key: "vfs.fs.size[/,pused]"
+      type: zabbix_agent
+      value_type: float
+      units: "%"
+      delay: 60
+      host_name: "{{ zabbix_template_use }}"
+
+  - name: Disk usage trigger
+    community.zabbix.zabbix_trigger:
+      zabbix_url: "{{ zabbix_api_url }}"
+      login_user: "{{ zabbix_api_user }}"
+      login_password: "{{ zabbix_api_pass }}"
+      name: "Disk usage > 90%"
+      expression: "last(/{{ zabbix_template_use }}/vfs.fs.size[/,pused])>90"
+      priority: disaster

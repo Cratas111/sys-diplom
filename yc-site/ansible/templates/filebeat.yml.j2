@@ -1,0 +1,39 @@
+filebeat.inputs:
+  - type: filestream
+    id: nginx-access
+    enabled: true
+    paths:
+      - /var/log/nginx/access.log
+    fields:
+      service: nginx
+      log_type: access
+    fields_under_root: true
+
+  - type: filestream
+    id: nginx-error
+    enabled: true
+    paths:
+      - /var/log/nginx/error.log
+    fields:
+      service: nginx
+      log_type: error
+    fields_under_root: true
+
+filebeat.modules:
+  - module: nginx
+    access:
+      enabled: true
+    error:
+      enabled: true
+
+setup.template.enabled: true
+setup.ilm.enabled: true
+
+output.elasticsearch:
+  hosts: ["{{ elasticsearch_host }}"]
+  username: "{{ filebeat_user }}"
+  password: "{{ filebeat_password }}"
+  ssl.verification_mode: none
+
+setup.kibana:
+  host: "{{ kibana_host }}"

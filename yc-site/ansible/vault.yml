@@ -1,0 +1,5 @@
+elastic_superuser: "elastic"
+elastic_password: "t4NN5OY-a2oBEdUnnsMH"
+
+filebeat_user: "filebeat_internal"
+filebeat_password: "yPldr3nxMKDjfPeu6Q4p"

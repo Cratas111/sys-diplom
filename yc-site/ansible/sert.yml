@@ -1,0 +1,35 @@
+---
+- name: Deploy Elasticsearch CA to Filebeat nodes
+  hosts: filebeat
+  become: true
+  tasks:
+
+    - name: Ensure certs directory exists
+      file:
+        path: /etc/filebeat/certs
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Copy Elasticsearch CA certificate
+      copy:
+        src: files/http_ca.crt
+        dest: /etc/filebeat/certs/ca.crt
+        owner: root
+        group: root
+        mode: '0600'
+
+    - name: Ensure Filebeat config uses the CA
+      lineinfile:
+        path: /etc/filebeat/filebeat.yml
+        regexp: '^(\s*)ssl.certificate_authorities:'
+        line: '  ssl.certificate_authorities: ["/etc/filebeat/certs/ca.crt"]'
+        insertafter: '^output.elasticsearch:'
+
+    - name: Restart Filebeat
+      systemd:
+        name: filebeat
+        state: restarted
+        enabled: true
+

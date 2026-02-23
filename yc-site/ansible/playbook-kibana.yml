@@ -1,0 +1,37 @@
+---
+- name: Install Kibana from local .deb
+  hosts: kibana
+  become: yes
+  vars:
+    kibana_deb_path: "/home/user7213/yc-site/ansible/files/kibana-8.10.2-amd64.deb"
+
+  tasks:
+    - name: Ensure required dependencies are installed
+      apt:
+        name: [ "apt-transport-https", "default-jre", "gnupg" ]
+        state: present
+        update_cache: yes
+
+    - name: Copy Kibana .deb to remote host
+      copy:
+        src: "{{ kibana_deb_path }}"
+        dest: /tmp/kibana.deb
+        mode: '0644'
+
+    - name: Install Kibana package
+      apt:
+        deb: /tmp/kibana.deb
+        state: present
+
+    - name: Enable and start Kibana service
+      systemd:
+        name: kibana
+        enabled: yes
+        state: started
+
+    - name: Ensure firewall allows HTTP (optional, if ufw is used)
+      ufw:
+        rule: allow
+        port: 5601
+        proto: tcp
+

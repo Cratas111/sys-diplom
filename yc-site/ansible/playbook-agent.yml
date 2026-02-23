@@ -1,0 +1,80 @@
+---
+- name: Install and configure Zabbix Server
+  hosts: zabbix
+  become: yes
+  vars:
+    zabbix_db_name: zabbix
+    zabbix_db_user: zabbix
+    zabbix_db_password: StrongPassword123
+    mysql_root_socket: /var/run/mysqld/mysqld.sock
+
+  tasks:
+
+  - name: Update apt cache
+    apt:
+      update_cache: yes
+      cache_valid_time: 3600
+
+  - name: Install required packages
+    apt:
+      name:
+        - mysql-server
+        - zabbix-server-mysql
+        - zabbix-frontend-php
+        - zabbix-nginx-conf
+        - zabbix-sql-scripts
+        - php-mysql
+        - php-fpm
+      state: present
+
+  - name: Ensure MySQL service is running
+    service:
+      name: mysql
+      state: started
+      enabled: yes
+
+  - name: Create MySQL user for Zabbix (using auth_socket root)
+    community.mysql.mysql_user:
+      name: "{{ zabbix_db_user }}"
+      password: "{{ zabbix_db_password }}"
+      priv: "*.*:ALL"
+      host: localhost
+      login_unix_socket: "{{ mysql_root_socket }}"
+      state: present
+
+  - name: Create Zabbix database
+    community.mysql.mysql_db:
+      name: "{{ zabbix_db_name }}"
+      state: present
+      login_user: "{{ zabbix_db_user }}"
+      login_password: "{{ zabbix_db_password }}"
+
+  - name: Import initial schema
+    command: >
+      zcat /usr/share/doc/zabbix-sql-scripts/mysql/server.sql.gz
+      | mysql -u{{ zabbix_db_user }} -p{{ zabbix_db_password }} {{ zabbix_db_name }}
+    args:
+      warn: false
+    when: ansible_facts['distribution_version'] is version('22.04', '>=')
+
+  - name: Configure Zabbix server DB connection
+    lineinfile:
+      path: /etc/zabbix/zabbix_server.conf
+      regexp: '^DBPassword='
+      line: "DBPassword={{ zabbix_db_password }}"
+
+  - name: Ensure Zabbix server is enabled and running
+    service:
+      name: zabbix-server
+      state: started
+      enabled: yes
+
+  - name: Ensure Nginx and PHP-FPM are running
+    service:
+      name: "{{ item }}"
+      state: started
+      enabled: yes
+    loop:
+      - nginx
+      - php8.1-fpm
+

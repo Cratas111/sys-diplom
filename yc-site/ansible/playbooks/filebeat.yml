@@ -1,0 +1,46 @@
+- name: Copy Filebeat .deb to host
+  copy:
+    src: ../files/filebeat-8.10.2-amd64.deb
+    dest: /tmp/filebeat.deb
+    mode: '0644'
+
+- name: Install filebeat
+  apt:
+    deb: /tmp/filebeat.deb
+
+- name: Configure filebeat
+  copy:
+    dest: /etc/filebeat/filebeat.yml
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      filebeat.inputs:
+        - type: filestream
+          id: nginx-access
+          paths:
+            - /var/log/nginx/access.log
+          fields:
+            service: nginx
+            log_type: access
+
+        - type: filestream
+          id: nginx-error
+          paths:
+            - /var/log/nginx/error.log
+          fields:
+            service: nginx
+            log_type: error
+
+      output.elasticsearch:
+        hosts: ["https://elasticsearch.ru-central1.internal:9200"]
+        username: "{{ filebeat_user }}"
+        password: "{{ filebeat_password }}"
+        ssl.verification_mode: none
+
+- name: Enable and restart filebeat
+  systemd:
+    name: filebeat
+    enabled: true
+    state: restarted
+

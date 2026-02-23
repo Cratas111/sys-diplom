@@ -1,0 +1,41 @@
+- name: Configure Elasticsearch security
+  hosts: elasticsearch
+  become: true
+  vars_files:
+    - ../vault.yml
+
+  tasks:
+    - name: Create filebeat role
+      uri:
+        url: "{{ elasticsearch_url }}/_security/role/filebeat_writer"
+        method: PUT
+        user: "{{ elastic_superuser }}"
+        password: "{{ elastic_password }}"
+        force_basic_auth: true
+        validate_certs: "{{ elasticsearch_validate_certs }}"
+        body_format: json
+        body:
+          cluster:
+            - monitor
+          indices:
+            - names: ["filebeat-*"]
+              privileges:
+                - auto_configure
+                - create_index
+                - write
+      register: role_result
+
+    - name: Create filebeat user
+      uri:
+        url: "{{ elasticsearch_url }}/_security/user/{{ filebeat_user }}"
+        method: PUT
+        user: "{{ elastic_superuser }}"
+        password: "{{ elastic_password }}"
+        force_basic_auth: true
+        validate_certs: "{{ elasticsearch_validate_certs }}"
+        body_format: json
+        body:
+          password: "{{ filebeat_password }}"
+          roles:
+            - filebeat_writer
+          full_name: "Filebeat internal user"

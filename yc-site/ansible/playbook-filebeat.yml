@@ -1,0 +1,45 @@
+---
+- name: Install and configure Filebeat on web servers
+  hosts: web
+  become: yes
+  tasks:
+    - name: Install dependencies
+      apt:
+        name: ['apt-transport-https', 'wget']
+        state: present
+        update_cache: yes
+
+    - name: Copy Filebeat deb package
+      copy:
+        src: files/filebeat-8.10.2-amd64.deb
+        dest: /tmp/filebeat.deb
+        mode: '0644'
+
+    - name: Install Filebeat
+      apt:
+        deb: /tmp/filebeat.deb
+        state: present
+
+    - name: Configure Filebeat to send Nginx logs to Elasticsearch
+      blockinfile:
+        path: /etc/filebeat/filebeat.yml
+        block: |
+          filebeat.inputs:
+          - type: log
+            enabled: true
+            paths:
+              - /var/log/nginx/access.log
+              - /var/log/nginx/error.log
+            fields:
+              log_type: nginx
+          output.elasticsearch:
+            hosts: ["http://elasticsearch.ru-central1.internal:9200"]
+          setup.kibana:
+            host: "http://kibana.ru-central1.internal:5601"
+
+    - name: Enable and start Filebeat
+      systemd:
+        name: filebeat
+        state: started
+        enabled: yes
+
