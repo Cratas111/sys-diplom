@@ -113,5 +113,28 @@ Cоздайте ВМ, разверните на ней Elasticsearch. Устан
 
 # Решение
 
-[Ссылка](/yc-site/terraform/main.tf)
+## Terraform
+[main.tf](/yc-site/terraform/main.tf)
+
+[network.tf](/yc-site/terraform/network.tf)
+
+[variables.tf](/yc-site/terraform/variables.tf)
+
+[compute.tf](/yc-site/terraform/compute.tf)
+
+[Фаил настройки балансировщика](/yc-site/terraform/alb.tf)
+
+## Ansible
+
+[inventory.yml](/yc-site/ansible/inventory.yml)
+
+[Nginx install](/yc-site/ansible/playbook.yml)
+
+[Zabbix install](/yc-site/ansible/playbook-agent.yml)
+
+[Elasticsearch install](/yc-site/ansible/playbook-elasticsearch.yml)
+
+[Filebeat install](/yc-site/ansible/playbook-filebeat.yml)
+
+
 
