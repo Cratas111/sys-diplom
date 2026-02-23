@@ -113,5 +113,5 @@ Cоздайте ВМ, разверните на ней Elasticsearch. Устан
 
 # Решение
 
-[Ссылка](/home/user7213/git/sys-diplom/yc-site/terraform/main.tf)
+[Ссылка](/yc-site/terraform/main.tf)
 
