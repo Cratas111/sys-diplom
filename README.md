@@ -113,6 +113,8 @@ Cоздайте ВМ, разверните на ней Elasticsearch. Устан
 
 # Решение
 
+Для развертывания инфраструктуры я использовал Terraform и Ansible. Ниже приведены конфигурационные файлы Terraform:
+
 ## Terraform
 [main.tf](/yc-site/terraform/main.tf)
 
@@ -124,17 +126,26 @@ Cоздайте ВМ, разверните на ней Elasticsearch. Устан
 
 [Фаил настройки балансировщика](/yc-site/terraform/alb.tf)
 
+А это плейбуки Ansible:
 ## Ansible
 
 [inventory.yml](/yc-site/ansible/inventory.yml)
 
 [Nginx install](/yc-site/ansible/playbook.yml)
 
-[Zabbix install](/yc-site/ansible/playbook-agent.yml)
+[Zabbix agent install](/yc-site/ansible/playbook-agent.yml)
+
+[Zabbix install](/yc-site/ansible/playbook-zabbix.yml)
 
 [Elasticsearch install](/yc-site/ansible/playbook-elasticsearch.yml)
 
 [Filebeat install](/yc-site/ansible/playbook-filebeat.yml)
+
+[Kibana install](/yc-site/ansible/playbook-kibana.yml)
+
+
+
+
 
 
 
