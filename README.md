@@ -143,6 +143,10 @@ Cоздайте ВМ, разверните на ней Elasticsearch. Устан
 
 [Kibana install](/yc-site/ansible/playbook-kibana.yml)
 
+ip адрес bastion
+ip адрес Zabbix server
+ip alhtc  Elasticsearch
+
 Скриншот инфраструктуры:
 ![Задание 1](/yc-site/Скриншот_Инфраструктура.png)
 ![Задание 1](/yc-site/Скриншот_ВМ.png)
