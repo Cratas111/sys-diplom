@@ -143,10 +143,26 @@ Cоздайте ВМ, разверните на ней Elasticsearch. Устан
 
 [Kibana install](/yc-site/ansible/playbook-kibana.yml)
 
+Скриншот инфраструктуры:
+![Задание 1](/yc-site/Скриншот_Инфраструктура.png)
+![Задание 1](/yc-site/Скриншот_ВМ.png)
 
 Скриншот работы сайта на сервере А
 ![Задание 1](/yc-site/Site_SerA.png)
 
 Скриншот работы сайта на сервере В
 ![Задание 1](/yc-site/Site_SerB.png)
+
+Скриншоты работы Zabbix:
+![Задание 1](/yc-site/Zabbix1.png)
+![Задание 1](/yc-site/Zabbix2.png)
+![Задание 1](/yc-site/Zabbix3.png)
+![Задание 1](/yc-site/Zabbix4.png)
+
+Скриншот интерфейса Kibana:
+![Задание 1](/yc-site/Filebeat.png)
+
+Скриншот выполнения снапшота:
+![Задание 1](/yc-site/Снапшот.png)
+
 
