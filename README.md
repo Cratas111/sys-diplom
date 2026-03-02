@@ -143,9 +143,9 @@ Cоздайте ВМ, разверните на ней Elasticsearch. Устан
 
 [Kibana install](/yc-site/ansible/playbook-kibana.yml)
 
-1. ip адрес bastion: 89.169.140.141
+1. ip адрес bastion: 130.193.51.250
 2. ip адрес kibana: 93.77.184.168
-3. ip адрес Zabbix server: 93.77.188.78
+3. ip адрес Zabbix server: 158.160.61.173
 4. ip адрес  Elasticsearch: 93.77.186.207
 
 Скриншот инфраструктуры:
